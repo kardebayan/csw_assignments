@@ -6,6 +6,16 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import Post
+from .templatetags.blog_tags import markdown_format
+
+
+class MarkdownFilterTests(TestCase):
+    def test_markdown_filter_converts_markdown_to_html(self):
+        rendered = markdown_format('**Bold** and *italic*')
+
+        self.assertIn('<strong>Bold</strong>', rendered)
+        self.assertIn('<em>italic</em>', rendered)
+        self.assertNotIn('**Bold**', rendered)
 
 
 class PostListByTagTests(TestCase):
@@ -141,3 +151,14 @@ class PostDetailSimilarPostsTests(TestCase):
         self.assertNotContains(response, self.unrelated.title)
         self.assertNotContains(response, self.draft.title)
         self.assertNotContains(response, self.fifth_match.title)
+
+    def test_detail_page_renders_post_body_as_markdown(self):
+        self.post.body = '# Markdown Heading\n\nThis has **strong text**.'
+        self.post.save()
+
+        response = self.client.get(self.post.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<h1>Markdown Heading</h1>', html=True)
+        self.assertContains(response, '<strong>strong text</strong>', html=True)
+        self.assertNotContains(response, '# Markdown Heading')

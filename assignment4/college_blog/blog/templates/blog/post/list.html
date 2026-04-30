@@ -1,4 +1,5 @@
 {% extends "blog/base.html" %}
+{% load blog_tags %}
 {% block title %}Blog Posts{% endblock %}
 {% block content %}
   {% if tag %}
@@ -11,7 +12,7 @@
       <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
       <p>By {{ post.author }} | {{ post.publish }}</p>
       {% include "blog/post/includes/tags.html" %}
-      <p>{{ post.body|truncatewords:30 }}</p>
+      {{ post.body|markdown_format|truncatewords_html:30 }}
     </div>
   {% empty %}
     <p>No posts found.</p>
