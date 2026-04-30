@@ -1,0 +1,29 @@
+{% extends "contentApp/base.html" %}
+
+{% block title %}Search articles{% endblock %}
+
+{% block content %}
+  <h2>Search articles</h2>
+
+  {% if query %}
+    <p>Results for "{{ query }}"</p>
+
+    {% for article in articles %}
+      <article>
+        <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
+        <p>By {{ article.author }} | {{ article.publish }}</p>
+        {% include "contentApp/article/includes/tags.html" %}
+        <p>{{ article.body|truncatewords:35 }}</p>
+        {% if is_postgres_search and article.rank %}
+          <p>Relevance score: {{ article.rank|floatformat:3 }}</p>
+        {% endif %}
+      </article>
+    {% empty %}
+      <p>No matching published articles found.</p>
+    {% endfor %}
+
+    {% include "contentApp/pagination.html" with page=page_obj %}
+  {% else %}
+    <p>Enter a search term to find published articles.</p>
+  {% endif %}
+{% endblock %}

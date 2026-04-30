@@ -9,9 +9,15 @@
     <h1><a href="{% url 'contentApp:article_list' %}">Content Project</a></h1>
     <nav>
       <a href="{% url 'contentApp:article_list' %}">Articles</a> |
+      <a href="{% url 'contentApp:article_search' %}">Search</a> |
       <a href="{% url 'contentApp:article_feed' %}">RSS feed</a> |
       <a href="{% url 'sitemap' %}">Sitemap</a>
     </nav>
+    <form action="{% url 'contentApp:article_search' %}" method="get">
+      <label for="site-search">Search articles</label>
+      <input id="site-search" type="search" name="q" value="{{ query|default:'' }}" required>
+      <button type="submit">Search</button>
+    </form>
   </header>
 
   <main>
