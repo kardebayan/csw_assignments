@@ -1,0 +1,27 @@
+{% extends "contentApp/base.html" %}
+
+{% block title %}
+  {% if tag %}Articles tagged with {{ tag.name }}{% else %}Articles{% endif %}
+{% endblock %}
+
+{% block content %}
+  {% if tag %}
+    <h2>Articles tagged with "{{ tag.name }}"</h2>
+    <p><a href="{% url 'contentApp:article_list' %}">View all articles</a></p>
+  {% else %}
+    <h2>Articles</h2>
+  {% endif %}
+
+  {% for article in articles %}
+    <article>
+      <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
+      <p>By {{ article.author }} | {{ article.publish }}</p>
+      {% include "contentApp/article/includes/tags.html" %}
+      <p>{{ article.body|truncatewords:35 }}</p>
+    </article>
+  {% empty %}
+    <p>No published articles found.</p>
+  {% endfor %}
+
+  {% include "contentApp/pagination.html" with page=page_obj %}
+{% endblock %}

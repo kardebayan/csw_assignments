@@ -1,0 +1,10 @@
+{% with tags=article.tags.all %}
+  {% if tags %}
+    <p>
+      Tags:
+      {% for tag in tags %}
+        <a href="{% url 'contentApp:article_list_by_tag' tag.slug %}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+{% endwith %}
