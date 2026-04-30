@@ -162,3 +162,36 @@ class PostDetailSimilarPostsTests(TestCase):
         self.assertContains(response, '<h1>Markdown Heading</h1>', html=True)
         self.assertContains(response, '<strong>strong text</strong>', html=True)
         self.assertNotContains(response, '# Markdown Heading')
+
+
+class SitemapTests(TestCase):
+    def setUp(self):
+        self.author = get_user_model().objects.create_user(
+            username='sitemap-author',
+            password='testpass123',
+        )
+        now = timezone.now()
+        self.published_post = Post.objects.create(
+            title='Published Sitemap Post',
+            slug='published-sitemap-post',
+            body='Published post body.',
+            publish=now,
+            status=Post.Status.PUBLISHED,
+            author=self.author,
+        )
+        self.draft_post = Post.objects.create(
+            title='Draft Sitemap Post',
+            slug='draft-sitemap-post',
+            body='Draft post body.',
+            publish=now - timedelta(days=1),
+            status=Post.Status.DRAFT,
+            author=self.author,
+        )
+
+    def test_sitemap_includes_only_published_posts(self):
+        response = self.client.get(reverse('sitemap'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/xml')
+        self.assertContains(response, self.published_post.get_absolute_url())
+        self.assertNotContains(response, self.draft_post.get_absolute_url())
