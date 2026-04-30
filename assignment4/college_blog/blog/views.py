@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
 from taggit.models import Tag
@@ -34,9 +35,25 @@ def post_detail(request, year, month, day, post):
         publish__month=month,
         publish__day=day
     )
+    post_tags_ids = post.tags.values_list('id', flat=True)
+    similar_posts = (
+        Post.published.filter(tags__in=post_tags_ids)
+        .exclude(id=post.id)
+        .annotate(same_tags=Count('tags'))
+        .order_by('-same_tags', '-publish')[:4]
+    )
     comments = post.comments.filter(active=True)
     form = CommentForm()
-    return render(request, 'blog/post/detail.html', {'post': post, 'comments': comments, 'form': form})
+    return render(
+        request,
+        'blog/post/detail.html',
+        {
+            'post': post,
+            'comments': comments,
+            'form': form,
+            'similar_posts': similar_posts,
+        }
+    )
 
 def post_share(request, post_id):
     post = get_object_or_404(Post, id=post_id, status=Post.Status.PUBLISHED)

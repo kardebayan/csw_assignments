@@ -8,6 +8,18 @@
   <p>
     <a href="{% url 'blog:post_share' post.id %}">Share Post</a>
   </p>
+
+  <h3>Similar Posts</h3>
+  {% for similar_post in similar_posts %}
+    <div>
+      <h4><a href="{{ similar_post.get_absolute_url }}">{{ similar_post.title }}</a></h4>
+      <p>By {{ similar_post.author }} | {{ similar_post.publish }}</p>
+      {% include "blog/post/includes/tags.html" with post=similar_post %}
+    </div>
+  {% empty %}
+    <p>No similar posts found.</p>
+  {% endfor %}
+
   <a href="{% url 'blog:post_list' %}">Back to Blog</a>
 
   <h3>Comments</h3>
