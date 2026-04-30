@@ -1,0 +1,11 @@
+<h3>Most Commented Posts</h3>
+<ul>
+  {% for post in most_commented_posts %}
+    <li>
+      <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+      ({{ post.total_comments }} comment{{ post.total_comments|pluralize }})
+    </li>
+  {% empty %}
+    <li>No commented posts yet.</li>
+  {% endfor %}
+</ul>
