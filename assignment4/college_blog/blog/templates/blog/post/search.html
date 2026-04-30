@@ -1,0 +1,25 @@
+{% extends "blog/base.html" %}
+{% load blog_tags %}
+
+{% block title %}Search Posts{% endblock %}
+
+{% block content %}
+  <h2>Search Posts</h2>
+  <form method="get">
+    {{ form.as_p }}
+    <input type="submit" value="Search">
+  </form>
+
+  {% if query %}
+    <h3>Results for "{{ query }}"</h3>
+    {% for post in results %}
+      <div>
+        <h4><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h4>
+        <p>By {{ post.author }} | {{ post.publish }}</p>
+        {{ post.body|markdown_format|truncatewords_html:30 }}
+      </div>
+    {% empty %}
+      <p>No results found.</p>
+    {% endfor %}
+  {% endif %}
+{% endblock %}

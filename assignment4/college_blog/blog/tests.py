@@ -195,3 +195,79 @@ class SitemapTests(TestCase):
         self.assertEqual(response['Content-Type'], 'application/xml')
         self.assertContains(response, self.published_post.get_absolute_url())
         self.assertNotContains(response, self.draft_post.get_absolute_url())
+
+
+class PostSearchTests(TestCase):
+    def setUp(self):
+        self.author = get_user_model().objects.create_user(
+            username='search-author',
+            password='testpass123',
+        )
+        now = timezone.now()
+        self.matching_post = Post.objects.create(
+            title='PostgreSQL Search Guide',
+            slug='postgresql-search-guide',
+            body='Full text search can rank relevant Django blog posts.',
+            publish=now,
+            status=Post.Status.PUBLISHED,
+            author=self.author,
+        )
+        self.other_post = Post.objects.create(
+            title='CSS Layout Notes',
+            slug='css-layout-notes',
+            body='Grid and flexbox layout examples.',
+            publish=now - timedelta(days=1),
+            status=Post.Status.PUBLISHED,
+            author=self.author,
+        )
+        self.draft_post = Post.objects.create(
+            title='Draft PostgreSQL Notes',
+            slug='draft-postgresql-notes',
+            body='This draft should not appear in search results.',
+            publish=now,
+            status=Post.Status.DRAFT,
+            author=self.author,
+        )
+
+    def test_search_returns_matching_published_posts(self):
+        response = self.client.get(reverse('blog:post_search'), {'query': 'PostgreSQL'})
+
+        self.assertEqual(response.status_code, 200)
+        results = list(response.context['results'])
+        self.assertIn(self.matching_post, results)
+        self.assertNotIn(self.other_post, results)
+        self.assertNotIn(self.draft_post, results)
+        self.assertEqual(response.context['query'], 'PostgreSQL')
+
+
+class LatestPostsFeedTests(TestCase):
+    def setUp(self):
+        self.author = get_user_model().objects.create_user(
+            username='feed-author',
+            password='testpass123',
+        )
+        now = timezone.now()
+        self.latest_post = Post.objects.create(
+            title='Latest Feed Post',
+            slug='latest-feed-post',
+            body='Latest feed body.',
+            publish=now,
+            status=Post.Status.PUBLISHED,
+            author=self.author,
+        )
+        self.draft_post = Post.objects.create(
+            title='Draft Feed Post',
+            slug='draft-feed-post',
+            body='Draft feed body.',
+            publish=now - timedelta(days=1),
+            status=Post.Status.DRAFT,
+            author=self.author,
+        )
+
+    def test_feed_lists_latest_published_posts(self):
+        response = self.client.get(reverse('blog:post_feed'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/rss+xml; charset=utf-8')
+        self.assertContains(response, self.latest_post.title)
+        self.assertNotContains(response, self.draft_post.title)

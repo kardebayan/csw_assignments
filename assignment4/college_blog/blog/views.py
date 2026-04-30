@@ -1,11 +1,13 @@
-from django.db.models import Count
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.db import connection
+from django.db.models import Count, Q
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
 from taggit.models import Tag
 from .models import Post
 
 from django.core.mail import send_mail
-from .forms import EmailPostForm, CommentForm
+from .forms import CommentForm, EmailPostForm, SearchForm
 
 class PostListView(ListView):
     context_object_name = 'posts'
@@ -83,3 +85,46 @@ def post_comment(request, post_id):
     else:
         form = CommentForm()
     return render(request, 'blog/post/comment.html', {'post': post, 'form': form, 'comment': comment})
+
+
+def post_search(request):
+    form = SearchForm()
+    query = None
+    results = Post.published.none()
+
+    if 'query' in request.GET:
+        form = SearchForm(request.GET)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            if connection.vendor == 'postgresql':
+                search_vector = (
+                    SearchVector('title', weight='A') +
+                    SearchVector('body', weight='B')
+                )
+                search_query = SearchQuery(query)
+                results = (
+                    Post.published.annotate(
+                        search=search_vector,
+                        rank=SearchRank(search_vector, search_query),
+                    )
+                    .filter(search=search_query)
+                    .order_by('-rank', '-publish')
+                )
+            else:
+                results = (
+                    Post.published.filter(
+                        Q(title__icontains=query) | Q(body__icontains=query)
+                    )
+                    .distinct()
+                    .order_by('-publish')
+                )
+
+    return render(
+        request,
+        'blog/post/search.html',
+        {
+            'form': form,
+            'query': query,
+            'results': results,
+        },
+    )

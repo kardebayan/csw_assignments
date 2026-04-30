@@ -1,0 +1,61 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$sample$NjnEiTvEg7yH9WsfrvfzRZl7hgI1tG8N2Dd0aJ2a9s0=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "blog_author",
+      "first_name": "Blog",
+      "last_name": "Author",
+      "email": "author@example.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2026-04-30T00:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "blog.post",
+    "pk": 1,
+    "fields": {
+      "title": "Getting Started with Django",
+      "slug": "getting-started-with-django",
+      "body": "Django helps developers build database-backed web applications quickly. This post introduces models, views, templates, and URL routing.",
+      "publish": "2026-04-30T09:00:00Z",
+      "created": "2026-04-30T09:00:00Z",
+      "updated": "2026-04-30T09:00:00Z",
+      "status": "PB",
+      "author": 1
+    }
+  },
+  {
+    "model": "blog.post",
+    "pk": 2,
+    "fields": {
+      "title": "PostgreSQL Full Text Search",
+      "slug": "postgresql-full-text-search",
+      "body": "PostgreSQL full text search ranks matching blog posts with search vectors, search queries, and relevance scores.",
+      "publish": "2026-04-30T10:00:00Z",
+      "created": "2026-04-30T10:00:00Z",
+      "updated": "2026-04-30T10:00:00Z",
+      "status": "PB",
+      "author": 1
+    }
+  },
+  {
+    "model": "blog.comment",
+    "pk": 1,
+    "fields": {
+      "post": 2,
+      "name": "Reader",
+      "email": "reader@example.com",
+      "body": "The ranking example makes search easier to understand.",
+      "created": "2026-04-30T10:15:00Z",
+      "updated": "2026-04-30T10:15:00Z",
+      "active": true
+    }
+  }
+]
